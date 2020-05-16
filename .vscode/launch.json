@@ -12,8 +12,6 @@
       "args": [
         "-g",
         "${fileDirname}/*.cpp",
-        "-I",
-        "${fileDirname}/*.h",
         "-o",
         "${fileDirname}/${fileBasenameNoExtension}"
       ],

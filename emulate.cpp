@@ -38,10 +38,68 @@ void Emulate8080p(State8080 *state)
   // NOP ez
   case 0x00:
     break;
+  case 0x05:
+  {
+    uint8_t result = state->b - 1;
+    state->b = result;
+    state->cc.z = result == 0;
+    state->cc.s = ((result & 0x80) != 0);
+    state->cc.p = parity(result & 0xff);
+    state->cc.ac = 
+    break;
+  }
+  case 0x11: 
+  {
+    state->d = opcode[2] & 0xff;
+    state->e = opcode[1] & 0xff;
+    state->pc += 2;
+    break;
+  }
+  case 0x13:
+  {
+    state->e++;
+    if (state->e == 0)
+      state->d++;
+    break;
+  }
+  case 0x1a:
+  {
+    uint16_t offset = (state->d << 8) | (state->e & 0xff);
+    state->a = state->memory[offset];
+    break;
+  };
+  case 0x21:
+  {
+    state->h = opcode[2] & 0xff;
+    state->l = opcode[1] & 0xff;
+    state->pc += 2;
+    break;
+  }
+  case 0x23:
+  {
+    state->l++;
+
+    if (state->l == 0 )
+      state->h++;
+
+    break;
+  }
   case 0x31: 
   {
     state->sp = (opcode[2] << 8) | opcode[1];
     state->pc += 2;
+    break;
+  }
+  case 0x06:
+  {
+    state->b = opcode[1];
+    state->pc += 1;
+    break;
+  }
+  case 0x77:
+  {
+    uint8_t offset = (state->h << 8) | (state->l & 0xff);
+    state->memory[offset] = state->a;
     break;
   }
   // ADD B
@@ -98,6 +156,15 @@ void Emulate8080p(State8080 *state)
     state->pc = (opcode[2] << 8) | opcode[1];
     break;
   }
+  case 0xcd:
+  {
+    state->memory[state->sp - 1] = (opcode[2]) & 0xff;
+    state->memory[state->sp - 2] = 0x01; //& 0xff;
+    state->memory[0] = 0x01;
+    state->sp = state->sp - 2;
+    state->pc = (opcode[2] << 8) | opcode[1];
+    break;
+  }
   // ADI D8
   case 0xC6:
   {
@@ -115,5 +182,4 @@ void Emulate8080p(State8080 *state)
   std::printf("\nA:$%02x B:$%02x C:$%02x D:$%02x E:$%02x H:$%02x L:$%02x SP:%04x\n\n",
          state->a, state->b, state->c, state->d,
          state->e, state->h, state->l, state->sp);
-
 }

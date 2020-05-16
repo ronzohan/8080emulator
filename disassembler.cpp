@@ -34,7 +34,7 @@ int Disassemble8080p(unsigned char *codebuffer, int pc)
   case 0x19: printf("%02x\t DAD D", code[0]); break;
   case 0x1a: printf("%02x\t LDAX D", code[0]); break;
   case 0x21: printf("%02x %02x %02x\t LXI H, #$%02x%02x", code[0], code[1], code[2], code[2], code[1]); opbytes = 3; break;
-  case 0x23: printf("%02\t INX H", code[0]); break;
+  case 0x23: printf("%02x\t INX H", code[0]); break;
   case 0x26: printf("%02x %02x %02x\t MVI H, #$%02x%02x", code[0], code[1], code[2], code[2], code[1]); opbytes = 3; break;
   case 0x27: printf("%02x\t DAA", code[0]); break;
   case 0x29: printf("%02x\t DAD H", code[0]); break;
