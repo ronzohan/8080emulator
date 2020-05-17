@@ -18,13 +18,19 @@ int parity(int bit)
   return __builtin_parity(bit);
 }
 
-void setFlags(uint16_t result, State8080 *state)
+void setArithmeticFlags(uint16_t result, State8080 *state)
 {
   state->cc.z = ((result & 0xff) == 0);
   state->cc.s = ((result & 0x80) != 0);
   state->cc.cy = (result > 0xff);
   state->cc.p = parity(result & 0xff);
-  state->a = result & 0xff;
+}
+
+void setFlagsZSP(uint8_t result, State8080 *state) 
+{
+  state->cc.z = ((result & 0xff) == 0);
+  state->cc.s = ((result & 0x80) != 0);
+  state->cc.p = parity(result & 0xff);
 }
 
 void Emulate8080p(State8080 *state)
@@ -41,11 +47,8 @@ void Emulate8080p(State8080 *state)
   case 0x05:
   {
     uint8_t result = state->b - 1;
+    setFlagsZSP(result, state);
     state->b = result;
-    state->cc.z = result == 0;
-    state->cc.s = ((result & 0x80) != 0);
-    state->cc.p = parity(result & 0xff);
-    state->cc.ac = 
     break;
   }
   case 0x11: 
@@ -139,16 +142,19 @@ void Emulate8080p(State8080 *state)
   // ADD C
   case 0x81:
   {
+    unimplementedInstruction(state);
     uint16_t answer = (uint16_t)state->a + (uint16_t)state->c;
-    setFlags(answer, state);
+    setArithmeticFlags(answer, state);
+    state->a = answer  & 0xff;
     break;
   }
   // ADD M
   case 0x86:
   {
+    unimplementedInstruction(state);
     uint16_t offset = (state->h << 8) | (state->l);
     uint16_t answer = (uint16_t)state->a + state->memory[offset];
-    setFlags(answer, state);
+    setArithmeticFlags(answer, state);
     break;
   }
   case 0xc3:
@@ -168,8 +174,9 @@ void Emulate8080p(State8080 *state)
   // ADI D8
   case 0xC6:
   {
+    unimplementedInstruction(state);
     uint16_t answer = (uint16_t)state->a + (uint16_t)opcode[1];
-    setFlags(answer, state);
+    setArithmeticFlags(answer, state);
     break;
   }
   default:
