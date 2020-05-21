@@ -15,7 +15,7 @@ void unimplementedInstruction(State8080 *state)
 // Returns 1 when the bits has even parity, 0 when odd parity
 int parity(int bit)
 {
-  return __builtin_parity(bit);
+  return __builtin_parity(bit) == 0;
 }
 
 void setArithmeticFlags(uint16_t result, State8080 *state)
@@ -49,6 +49,12 @@ void Emulate8080p(State8080 *state)
     uint8_t result = state->b - 1;
     setFlagsZSP(result, state);
     state->b = result;
+    break;
+  }
+  case 0x0e:
+  {
+    state->c = opcode[1] & 0xff;
+    state->pc++;
     break;
   }
   case 0x11: 
@@ -93,10 +99,22 @@ void Emulate8080p(State8080 *state)
     state->pc += 2;
     break;
   }
+  case 0x36:
+  {
+    uint16_t hl = (state->h << 8) | (state->l & 0xff);
+    state->memory[hl] = opcode[1];
+    state->pc++;
+    break;
+  }
   case 0x06:
   {
     state->b = opcode[1];
     state->pc += 1;
+    break;
+  }
+  case 0x7c:
+  {
+    state->a = state->h & 0xff;
     break;
   }
   case 0x77:
@@ -157,16 +175,30 @@ void Emulate8080p(State8080 *state)
     setArithmeticFlags(answer, state);
     break;
   }
+  case 0xc2: // JNZ
+  {
+    if (state->cc.z == 0)
+      state->pc = (opcode[2] << 8) | opcode[1];
+    else 
+      state->pc += 2;
+    break;
+  }
   case 0xc3:
   {
     state->pc = (opcode[2] << 8) | opcode[1];
     break;
   }
-  case 0xcd:
+  case 0xc9: // ret
   {
-    state->memory[state->sp - 1] = (opcode[2]) & 0xff;
-    state->memory[state->sp - 2] = 0x01; //& 0xff;
-    state->memory[0] = 0x01;
+    state->pc = (state->memory[state->sp] & 0xff) | (state->memory[state->sp + 1] << 8);
+    state->sp += 2;
+    break;
+  }
+  case 0xcd: // Call
+  {
+    uint16_t ret = state->pc + 2;
+    state->memory[state->sp - 1] = (ret >> 8) & 0xff;
+    state->memory[state->sp - 2] = ret & 0xff;
     state->sp = state->sp - 2;
     state->pc = (opcode[2] << 8) | opcode[1];
     break;
@@ -177,6 +209,13 @@ void Emulate8080p(State8080 *state)
     unimplementedInstruction(state);
     uint16_t answer = (uint16_t)state->a + (uint16_t)opcode[1];
     setArithmeticFlags(answer, state);
+    break;
+  }
+  case 0xfe:
+  {
+    uint16_t answer = (uint16_t)state->a - (uint16_t)opcode[1];
+    setArithmeticFlags(answer, state);
+    state->pc++;
     break;
   }
   default:
