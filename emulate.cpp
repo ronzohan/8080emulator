@@ -33,6 +33,12 @@ void setFlagsZSP(uint8_t result, State8080 *state)
   state->cc.p = parity(result & 0xff);
 }
 
+void push(uint16_t r, State8080 *state) {
+  state->memory[(state->sp - 2)] = r << 8;
+  state->memory[(state->sp - 1)] = r & 0xff;
+  state->sp -= 2;
+}
+
 void Emulate8080p(State8080 *state)
 {
   
@@ -209,6 +215,16 @@ void Emulate8080p(State8080 *state)
     unimplementedInstruction(state);
     uint16_t answer = (uint16_t)state->a + (uint16_t)opcode[1];
     setArithmeticFlags(answer, state);
+    break;
+  }
+  case 0xd5:
+  {
+    break;
+  }
+  case 0xe5:
+  {
+    uint16_t reg = (state->h << 8) | (state->l & 0xff);
+    push(reg, state);
     break;
   }
   case 0xfe:

@@ -115,11 +115,12 @@ int main(int argc, char **argv)
   fclose(f);
 
   int pc = 0;
-  int limit = 10;
   
   state->pc = 0;
+  int count = 0;
   while (true)
   {
+    count++;
     Disassemble8080p(buffer, state->pc);
     Emulate8080p(state);
   }
