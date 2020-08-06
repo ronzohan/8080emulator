@@ -18,6 +18,24 @@ typedef struct State8080
   uint8_t *memory;
   struct ConditionCodes cc;
   uint8_t int_enable;
+
+  uint16_t de() {
+    return (d << 8) | (e & 0xff);
+  }
+
+  void setDE(uint16_t r) {
+    d = r >> 8 & 0xff;
+    e = r & 0xff;
+  }
+
+  uint16_t hl() {
+    return (h << 8) | (l & 0xff);
+  }
+
+  void setHL(uint16_t r) {
+    h = r >> 8 & 0xff;
+    l = r & 0xff;
+  }
 };
 
 #endif
