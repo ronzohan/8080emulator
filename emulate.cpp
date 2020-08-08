@@ -69,12 +69,14 @@ void setFlagsZSP(uint8_t result, State8080 *state)
   state->cc.p = parity(result & 0xff);
 }
 
+// DONE
 void push(uint16_t r, State8080 *state) {
   state->memory[(state->sp - 2)] = r << 8;
   state->memory[(state->sp - 1)] = r & 0xff;
   state->sp -= 2;
 }
 
+// DONE
 uint16_t nextWord(uint16_t pc, State8080 *state) {
   unsigned char *opcode = &state->memory[state->pc];
   state->pc += 2;

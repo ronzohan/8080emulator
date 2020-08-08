@@ -4,7 +4,7 @@
 #include <iostream>
 #include "condition_codes.h"
 
-typedef struct State8080
+struct State8080
 {
   uint8_t a;
   uint8_t b;
