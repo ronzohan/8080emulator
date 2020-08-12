@@ -84,20 +84,20 @@ struct State8080
 	  return opcode[0];
   }
 
-  void setFlagsZSPAC(uint8_t result)
+  void setFlagsZSPAC(uint16_t result)
   {
 	  cc.z = ((result & 0xff) == 0);
 	  cc.s = ((result & 0x80) != 0);
 	  cc.p = parity(result & 0xff);
   }
 
-  void setFlagsZSPACCY(uint8_t result)
+  void setFlagsZSPACCY(uint16_t result)
   {
 	  setFlagsZSPAC(result);
 	  setFlagCY(result);
   }
 
-  void setFlagCY(uint8_t result)
+  void setFlagCY(uint16_t result)
   {
 	  cc.cy = (result > 0xff);
   }

@@ -7,6 +7,7 @@ private:
   State8080 *state;
   void unimplementedInstruction();
   void emulate8080p();
+  int instructionCount;
 public:
   Emulator();
   void emulate(std::string filename);
