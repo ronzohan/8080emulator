@@ -102,6 +102,12 @@ struct State8080
 	  cc.cy = (result > 0xff);
   }
 
+  uint16_t addWord(uint16_t lhs, uint16_t rhs) {
+	  uint32_t result = lhs + rhs;
+	  cc.cy = result > 0xffff;
+	  return result;
+  }
+
   // Returns 1 when the bits has even parity, 0 when odd parity
   int parity(int x)
   {

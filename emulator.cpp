@@ -80,6 +80,12 @@ void Emulator::emulate8080p()
 	/*case 0x1c:
 		state->e += 1;
 		break;*/
+	case 0x19:
+	{
+		uint16_t result = state->addWord(state->hl(), state->de());
+		state->setHL(result);
+		break;
+	}
 	case 0x21:
 		state->setHL(state->nextWord());
 		break;
@@ -89,6 +95,12 @@ void Emulator::emulate8080p()
 	case 0x26:
 		state->h = state->nextByte();
 		break;
+	case 0x29:
+	{
+		uint16_t result = state->addWord(state->hl(), state->hl());
+		state->setHL(result);
+		break;
+	}
 	case 0x31:
 		state->sp = state->nextWord();
 		break;
@@ -167,9 +179,11 @@ int Emulator::disassemble8080p(unsigned char* codebuffer, int pc)
 	case 0x13: printf("INX D"); break;
 	case 0x1a: printf("LDAX D"); break;
 	case 0x1c: printf("INC E"); break;
+	case 0x19: printf("DAD D"); break;
 	case 0x21: printf("LXI H, %02x%02x", code[2], code[1]); break;
 	case 0x23: printf("INX H"); break;
 	case 0x26: printf("MVI H, %02x", code[1]); break;
+	case 0x29: printf("DAD H"); break;
 	case 0x36: printf("MVI M, %02x", code[1]); break;
 	case 0x6f: printf("MOV L, A"); break;
 	case 0x77: printf("MOV M, A"); break;
