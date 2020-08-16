@@ -20,6 +20,15 @@ struct State8080
   struct ConditionCodes cc;
   uint8_t int_enable;
 
+  uint16_t bc() {
+	  return (b << 8) | (c & 0xff);
+  }
+
+  void setBC(uint16_t r) {
+	  b = r >> 8 & 0xff;
+	  c = r & 0xff;
+  }
+
   uint16_t de() {
     return (d << 8) | (e & 0xff);
   }
@@ -44,9 +53,10 @@ struct State8080
 	  sp -= 2;
   }
 
-  void pop() {
-	  pc = (memory[sp + 1] & 0xff) | (memory[sp] << 8);
+  uint16_t pop() {
+	  uint16_t result = (memory[sp + 1] & 0xff) | (memory[sp] << 8);
 	  sp += 2;
+	  return result;
   }
 
   uint16_t nextWord(uint16_t pc) {

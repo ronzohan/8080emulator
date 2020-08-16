@@ -55,6 +55,9 @@ void Emulator::emulate8080p()
 		// NOP
 	case 0x00:
 		break;
+	case 0x01:
+		state->setBC(state->nextWord());
+		break;
 	case 0x05:
 	{
 		uint8_t result = state->b - 1;
@@ -65,6 +68,12 @@ void Emulator::emulate8080p()
 	case 0x06:
 		state->b = state->nextByte();
 		break;
+	case 0x09:
+	{
+		uint16_t result = state->addWord(state->hl(), state->bc());
+		state->setHL(result);
+		break;
+	}
 	case 0x0e:
 		state->c = state->nextByte();
 		break;
@@ -111,22 +120,32 @@ void Emulator::emulate8080p()
 	case 0x6f:
 		state->l = state->a;
 		break;
-	case 0xc2: // JNZ
-	 {
-		if (state->cc.z == 0)
-			state->pc = state->getWord();
-	   else 
-	     state->pc += 2;
-	   break;
-	 }
+	case 0x77:
+		state->memory[state->hl()] = state->a;
+		break;
 	case 0x7c:
 		state->a = state->h;
 		break;
+	case 0xc1:
+		state->setBC(state->pop());
+		break;
+	case 0xc2: // JNZ
+	{
+		if (state->cc.z == 0)
+			state->pc = state->getWord();
+		else
+			state->pc += 2;
+		break;
+	}
 	case 0xc3:
 		state->pc = state->getWord();
 		break;
+	case 0xc5:
+		state->push(state->bc());
+		break;
+
 	case 0xc9:
-		state->pop();
+		state->pc = state->pop();
 		break;
 	case 0xcd:
 	{
@@ -135,15 +154,32 @@ void Emulator::emulate8080p()
 		state->pc = w;
 		break;
 	}
-	case 0x77:
-		state->memory[state->hl()] = state->a;
+	case 0xd1:
+		state->setDE(state->pop());
+		break;
+	case 0xd3:
+		// TODO: OUT Special
+		state->pc++;
 		break;
 	case 0xd5:
-		state->push(state->d);
+		state->push(state->de());
 		break;
+	case 0xe1:
+	{
+		uint16_t result = state->pop();
+		state->setHL(result);
+		break;
+	}
 	case 0xe5:
-		state->push(state->h);
+		state->push(state->hl());
 		break;
+	case 0xeb:
+	{
+		uint16_t de = state->de();
+		state->setDE(state->hl());
+		state->setHL(de);
+		break;
+	}
 	case 0xfe:
 	{
 		uint16_t result = state->a - opcode[1];
@@ -173,7 +209,9 @@ int Emulator::disassemble8080p(unsigned char* codebuffer, int pc)
 	switch (*code)
 	{
 	case 0x00: printf("%02x NOP", code[0]); break;
+	case 0x01: printf("LXI BC, %02x%02x", code[2], code[1]); break;
 	case 0x05: printf("DCR B"); break;
+	case 0x09: printf("DAD B"); break;
 	case 0x0e: printf("MVI C, %02x", code[1]); break;
 	case 0x11: printf("LXI D, %02x%02x", code[2], code[1]); break;
 	case 0x13: printf("INX D"); break;
@@ -188,12 +226,16 @@ int Emulator::disassemble8080p(unsigned char* codebuffer, int pc)
 	case 0x6f: printf("MOV L, A"); break;
 	case 0x77: printf("MOV M, A"); break;
 	case 0x7c: printf("MOV A, H"); break;
+	case 0xc1: printf("POP BC"); break;
 	case 0xc2: printf("JNZ %02x%02x", code[2], code[1]); break;
+	case 0xc5: printf("PUSH BC"); break;
 	case 0xc3: printf("JMP %02x%02x", code[2], code[1]); break;
 	case 0xc9: printf("RET"); break;
 	case 0xcd: printf("CALL %02x%02x", code[2], code[1]); break;
+	case 0xd3: printf("OUT %02x", code[1]); break;
 	case 0xd5: printf("PUSH D"); break;
 	case 0xe5: printf("PUSH H"); break;
+	case 0xeb: printf("XCHG"); break;
 	case 0xfe: printf("CPI %02x", code[1]); break;
 	default:
 		printf("%02x\t", code[0]);
