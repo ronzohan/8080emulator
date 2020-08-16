@@ -74,6 +74,13 @@ void Emulator::emulate8080p()
 		state->setHL(result);
 		break;
 	}
+	case 0x0d:
+	{
+		uint8_t result = state->c - 1;
+		state->setFlagsZSPAC(result);
+		state->c = result;
+		break;
+	}
 	case 0x0e:
 		state->c = state->nextByte();
 		break;
@@ -117,14 +124,29 @@ void Emulator::emulate8080p()
 		state->memory[state->hl()] = opcode[1];
 		state->pc++;
 		break;
+	case 0x56:
+		state->d = state->memory[state->hl()];
+		break;
+	case 0x5e:
+		state->e = state->memory[state->hl()];
+		break;
+	case 0x66:
+		state->h = state->memory[state->hl()];
+		break;
 	case 0x6f:
 		state->l = state->a;
+		break;
+	case 0x7a:
+		state->a = state->d;
 		break;
 	case 0x77:
 		state->memory[state->hl()] = state->a;
 		break;
 	case 0x7c:
 		state->a = state->h;
+		break;
+	case 0x7e:
+		state->a = state->memory[state->hl()];
 		break;
 	case 0xc1:
 		state->setBC(state->pop());
@@ -212,6 +234,7 @@ int Emulator::disassemble8080p(unsigned char* codebuffer, int pc)
 	case 0x01: printf("LXI BC, %02x%02x", code[2], code[1]); break;
 	case 0x05: printf("DCR B"); break;
 	case 0x09: printf("DAD B"); break;
+	case 0x0d: printf("DCR C"); break;
 	case 0x0e: printf("MVI C, %02x", code[1]); break;
 	case 0x11: printf("LXI D, %02x%02x", code[2], code[1]); break;
 	case 0x13: printf("INX D"); break;
@@ -223,6 +246,7 @@ int Emulator::disassemble8080p(unsigned char* codebuffer, int pc)
 	case 0x26: printf("MVI H, %02x", code[1]); break;
 	case 0x29: printf("DAD H"); break;
 	case 0x36: printf("MVI M, %02x", code[1]); break;
+	case 0x5e: printf("MOV E, M"); break;
 	case 0x6f: printf("MOV L, A"); break;
 	case 0x77: printf("MOV M, A"); break;
 	case 0x7c: printf("MOV A, H"); break;
