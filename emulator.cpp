@@ -36,11 +36,12 @@ void Emulator::emulate(string filename)
 	state->pc = 0;
 	int count = 0;
 	//1541
-	while (true /*&& count < 1554*/)
+	while (true)
 	{
 		//std::cout << "Count: " << count << "\n";
 		//disassemble8080p(buffer, state->pc);
 		emulate8080p();
+		//printCurrentState();
 		instructionCount++;
 	}
 }
@@ -60,7 +61,7 @@ void Emulator::emulate8080p()
 		break;
 	case 0x05:
 	{
-		uint8_t result = state->b - 1;
+		uint16_t result = state->b - 1;
 		state->setFlagsZSPAC(result);
 		state->b = result;
 		break;
@@ -274,15 +275,19 @@ int Emulator::disassemble8080p(unsigned char* codebuffer, int pc)
 void Emulator::unimplementedInstruction()
 {
 	state->pc--;
-	printf("Instruction executed count: %d\n", instructionCount);
-	/* print out processor state */
-	printf("C=%d, P=%d, S=%d, Z=%d", state->cc.cy, state->cc.p, state->cc.s, state->cc.z);
-	printf("\nA:$%02x B:$%02x C:$%02x D:$%02x E:$%02x H:$%02x L:$%02x PC:%04x SP:%04x \n\r",
-		state->a, state->b, state->c, state->d,
-		state->e, state->h, state->l, state->pc, state->sp);
+	printCurrentState();
 
 	//pc will have advanced one, so undo that
 	cout << "Error: Unimplemented instruction\n";
 	disassemble8080p(state->memory, state->pc);
 	exit(1);
+}
+
+void Emulator::printCurrentState() {
+	printf("Instruction executed count: %d\n", instructionCount);
+	/* print out processor state */
+	printf("C=%d, P=%d, S=%d, Z=%d AC=%d", state->cc.cy, state->cc.p, state->cc.s, state->cc.z, state->cc.ac);
+	printf("\nA:$%02x F:$%02x B:$%02x C:$%02x D:$%02x E:$%02x H:$%02x L:$%02x PC:%04x SP:%04x \n\n",
+		state->a, state->f, state->b, state->c, state->d,
+		state->e, state->h, state->l, state->pc, state->sp);
 }

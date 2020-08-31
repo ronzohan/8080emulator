@@ -6,6 +6,7 @@ class Emulator
 private:
   State8080 *state;
   void unimplementedInstruction();
+  void printCurrentState();
   void emulate8080p();
   int instructionCount;
 public:
