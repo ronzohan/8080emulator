@@ -21,6 +21,11 @@ struct State8080
   struct ConditionCodes cc;
   uint8_t int_enable;
 
+  uint16_t af()
+  {
+    return (a << 8) | (f & 0xff);
+  }
+
   uint16_t bc()
   {
     return (b << 8) | (c & 0xff);
