@@ -142,6 +142,12 @@ struct State8080
        (cc.cy & 0x0001);
   }
 
+  void setPSW(uint16_t result)
+  { 
+    a = result >> 8 & 0xff;
+    f = result & 0xff;
+  }
+
   uint16_t addWord(uint16_t lhs, uint16_t rhs)
   {
     uint32_t result = lhs + rhs;

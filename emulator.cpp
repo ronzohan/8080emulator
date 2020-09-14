@@ -35,13 +35,18 @@ void Emulator::emulate(string filename)
 
 	state->pc = 0;
 	int count = 0;
-	//1541
+
 	while (true)
 	{
-		//std::cout << "Count: " << count << "\n";
-		//disassemble8080p(buffer, state->pc);
+		if (instructionCount > 41838) {
+			printCurrentState();
+			break;
+		}
+
+		//std::cout << "Count: " << instructionCount << "\n";
+		disassemble8080p(buffer, state->pc);
 		emulate8080p();
-		//printCurrentState();
+		
 		instructionCount++;
 	}
 }
@@ -133,6 +138,9 @@ void Emulator::emulate8080p()
 		state->memory[state->hl()] = opcode[1];
 		state->pc++;
 		break;
+	case 0x3a:
+		state->a = state->memory[state->nextWord()];
+		break;
 	case 0x56:
 		state->d = state->memory[state->hl()];
 		break;
@@ -150,6 +158,9 @@ void Emulator::emulate8080p()
 		break;
 	case 0x77:
 		state->memory[state->hl()] = state->a;
+		break;
+	case 0x7b:
+		state->a = state->e;
 		break;
 	case 0x7c:
 		state->a = state->h;
@@ -222,6 +233,12 @@ void Emulator::emulate8080p()
 		uint16_t de = state->de();
 		state->setDE(state->hl());
 		state->setHL(de);
+		break;
+	}
+	case 0xf1:
+	{
+		state->setPSW(state->pop());
+		printf("here");
 		break;
 	}
 	case 0xf5:
@@ -303,6 +320,9 @@ int Emulator::disassemble8080p(unsigned char *codebuffer, int pc)
 	case 0x36:
 		printf("MVI M, %02x", code[1]);
 		break;
+	case 0x3a:
+		printf("LDA %02x%02x", code[2], code[1]);
+		break;
 	case 0x5e:
 		printf("MOV E, M");
 		break;
@@ -311,6 +331,9 @@ int Emulator::disassemble8080p(unsigned char *codebuffer, int pc)
 		break;
 	case 0x77:
 		printf("MOV M, A");
+		break;
+	case 0x7b:
+		printf("MOV A, E");
 		break;
 	case 0x7c:
 		printf("MOV A, H");
@@ -344,6 +367,9 @@ int Emulator::disassemble8080p(unsigned char *codebuffer, int pc)
 		break;
 	case 0xeb:
 		printf("XCHG");
+		break;
+	case 0xf1:
+		printf("POP PSW");
 		break;
 	case 0xfe:
 		printf("CPI %02x", code[1]);
