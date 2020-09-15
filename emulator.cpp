@@ -38,10 +38,10 @@ void Emulator::emulate(string filename)
 
 	while (true)
 	{
-		if (instructionCount > 41838) {
-			printCurrentState();
-			break;
-		}
+		// if (instructionCount > 41838) {
+		// 	printCurrentState();
+		// 	break;
+		// }
 
 		//std::cout << "Count: " << instructionCount << "\n";
 		disassemble8080p(buffer, state->pc);
@@ -140,6 +140,9 @@ void Emulator::emulate8080p()
 		break;
 	case 0x3a:
 		state->a = state->memory[state->nextWord()];
+		break;
+	case 0x3e:
+		state->a = state->nextByte();
 		break;
 	case 0x56:
 		state->d = state->memory[state->hl()];
@@ -322,6 +325,9 @@ int Emulator::disassemble8080p(unsigned char *codebuffer, int pc)
 		break;
 	case 0x3a:
 		printf("LDA %02x%02x", code[2], code[1]);
+		break;
+	case 0x3e:
+		printf("MVI A, %02x%02x", code[2], code[1]);
 		break;
 	case 0x5e:
 		printf("MOV E, M");
