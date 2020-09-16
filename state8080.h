@@ -168,6 +168,20 @@ struct State8080
     }
     return (0 == (p & 0x1));
   }
+
+  void aXOR(uint8_t val) 
+  {
+    uint8_t result = a ^ val;
+    a = result;
+    setFlagsZSPACCY(result);
+  }
+
+  void aAND(uint8_t val)
+  {
+    uint8_t result = a & val;
+    a = result;
+    setFlagsZSPACCY(result);
+  }
 };
 
 #endif
